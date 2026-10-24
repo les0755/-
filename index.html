@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>식품 구성 자전거 지렁이 대모험 - 레트로 아케이드</title>
+    <meta name="description" content="6대 식품군을 배우고 목표 음식을 찾아 자전거를 완성하는 레트로 아케이드 지렁이 게임" />
+    <meta property="og:title" content="식품 구성 자전거 지렁이 대모험" />
+    <meta property="og:description" content="6대 식품군을 배우고 목표 음식을 찾아 자전거를 완성하는 레트로 아케이드 지렁이 게임" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- 1. Tailwind CSS Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              grain: '#facc15',
+              vegetable: '#4ade80',
+              protein: '#c084fc',
+              fruit: '#fb7185',
+              dairy: '#38bdf8',
+              oil: '#94a3b8',
+            }
+          }
+        }
+      }
+    </script>
+
+    <!-- 2. 외부 CDN: Lucide 아이콘 & 폭죽 효과 -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
+
+    <!-- 3. 스타일시트 연결 -->
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- 4. 스크립트 연결 -->
+    <script src="script.js" defer></script>
+  </head>
+  <body class="bg-[#0f111a] text-slate-100 flex flex-col min-h-screen">
+    
+    <!-- 최상단: 레트로 아케이드 마퀴 & 스탯 바 -->
+    <header class="bg-[#181c2b] border-b-2 border-[#2b334a] sticky top-0 z-30 shadow-md">
+      <div class="max-w-7xl mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-3">
+        
+        <!-- 오락실 로고 타이틀 -->
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-lg bg-amber-500 border-2 border-amber-300 flex items-center justify-center text-black font-black text-base shadow-xs">
+            🚴
+          </div>
+          <div>
+            <h1 class="text-sm md:text-base font-bold text-yellow-400 font-pixel tracking-wider">
+              NUTRITION-BIKE ARCADE
+            </h1>
+            <p class="text-[10px] text-slate-400 font-pixel">보건복지부·한국영양학회 표준 6대 식품군</p>
+          </div>
+        </div>
+
+        <!-- 아케이드 HUD (1UP 점수, 하트 체력, 타이머, 스테이지) -->
+        <div class="flex items-center space-x-3 md:space-x-4 bg-[#0d0f17] px-3 py-1.5 rounded-lg border border-[#2b334a] font-pixel text-xs">
+          <!-- 1UP 점수 -->
+          <div>
+            <span class="text-rose-400 font-bold mr-1">1UP</span>
+            <span id="scoreText" class="text-yellow-300 tracking-widest font-black">000000</span>
+          </div>
+
+          <!-- 라이프 (하트 5개로 여유있게 증가) -->
+          <div class="pl-2 border-l border-[#2b334a]">
+            <span class="text-slate-400 mr-1 hidden sm:inline">HP:</span>
+            <span id="livesContainer" class="text-red-500 font-bold tracking-wider">♥ ♥ ♥ ♥ ♥</span>
+          </div>
+
+          <!-- 스테이지 번호 -->
+          <div class="pl-2 border-l border-[#2b334a]">
+            <span id="stageText" class="text-emerald-400 font-bold">STAGE 01</span>
+          </div>
+
+          <!-- 스톱워치 타이머 -->
+          <div class="pl-2 border-l border-[#2b334a]">
+            <span class="text-slate-400 mr-1">TIME</span>
+            <span id="timerText" class="text-sky-300 font-mono font-bold">00:00</span>
+          </div>
+        </div>
+
+        <!-- 아케이드 유틸 버튼군 -->
+        <div class="flex items-center space-x-1.5 font-pixel text-xs">
+          <select id="difficultySelect" class="bg-[#121521] border border-[#2b334a] rounded px-2 py-1 text-slate-300 focus:outline-none cursor-pointer">
+            <option value="easy">EASY (벽통과)</option>
+            <option value="normal" selected>NORMAL (벽충돌)</option>
+            <option value="hard">HARD (고속도)</option>
+          </select>
+
+          <button id="soundToggleBtn" class="px-2 py-1 bg-[#23293d] hover:bg-[#2e3752] rounded border border-[#3b4463] text-slate-200 cursor-pointer">
+            🔊 소리 켬
+          </button>
+
+          <button id="bgmToggleBtn" class="px-2 py-1 bg-[#23293d] hover:bg-[#2e3752] rounded border border-[#3b4463] text-slate-200 cursor-pointer">
+            🎵 BGM OFF
+          </button>
+
+          <button id="pauseBtn" class="px-2 py-1 bg-[#23293d] hover:bg-[#2e3752] rounded border border-[#3b4463] text-slate-200 cursor-pointer" title="일시정지">
+            ⏸️
+          </button>
+
+          <button id="encyclopediaBtn" class="px-2 py-1 bg-amber-950 hover:bg-amber-900 rounded border border-amber-600 text-yellow-300 font-bold cursor-pointer">
+            📖 도감
+          </button>
+
+          <button id="guideBtn" class="px-2 py-1 bg-blue-950 hover:bg-blue-900 rounded border border-blue-600 text-sky-300 font-bold cursor-pointer">
+            ❓ 설명
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- 메인 아케이드 캐비닛 화면 -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-4 flex flex-col gap-3">
+      
+      <!-- 상단 타깃 미션 전광판 (오락실 배너) -->
+      <section class="bg-[#181c2b] rounded-xl border-2 border-yellow-500/80 p-3 shadow-lg">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 font-pixel">
+          
+          <div class="flex items-center space-x-3">
+            <span class="text-2xl animate-bounce">🎯</span>
+            <div>
+              <div class="text-[11px] text-yellow-400 font-bold tracking-wider">
+                CURRENT TARGET MISSION
+              </div>
+              <h2 id="missionTitle" class="text-lg md:text-xl font-bold text-yellow-300 tracking-tight">
+                [곡류] 골라먹기!
+              </h2>
+              <p id="missionDesc" class="text-[11px] text-slate-400 font-sans">
+                주 영양소: 탄수화물 (주식으로 섭취, 활동 에너지 공급)
+              </p>
+            </div>
+          </div>
+
+          <!-- 먹어야 할 정답 음식 태그들 -->
+          <div class="flex-1 md:max-w-xl">
+            <div class="text-[11px] text-yellow-500/90 font-bold mb-1">
+              ▼ 지금 골라먹어야 할 목표 음식:
+            </div>
+            <div id="missionHintFoods" class="flex flex-wrap gap-1.5">
+              <!-- JS 동적 생성 -->
+            </div>
+          </div>
+
+          <!-- 획득 수량 & 완성도 바 -->
+          <div class="bg-[#0f121d] p-2.5 rounded-lg border border-[#2b334a] min-w-[150px]">
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-400">자전거 완성도</span>
+              <span id="totalProgressPercent" class="text-green-400 font-bold">0%</span>
+            </div>
+            <div class="w-full bg-[#1e2333] h-2 rounded overflow-hidden">
+              <div id="totalProgressBar" class="bg-gradient-to-r from-yellow-400 to-green-400 h-full w-0 transition-all"></div>
+            </div>
+            <div class="text-[11px] text-right text-yellow-300 mt-1 font-bold" id="missionCount">
+              0 / 4 개
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2열 그리드: 좌측 아날로그 자전거 계기판 / 우측 CRT 스크린 지렁이 플레이필드 -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 items-start">
+        
+        <!-- 좌측: 식품 구성 자전거 계기판 & 슬롯 리스트 (5컬럼) -->
+        <section class="lg:col-span-5 bg-[#181c2b] rounded-2xl p-4 border border-[#2b334a] shadow-lg flex flex-col gap-3 font-pixel">
+          <div class="flex items-center justify-between pb-2 border-b border-[#2b334a]">
+            <div class="flex items-center space-x-1.5">
+              <span class="text-xs text-yellow-400">●</span>
+              <h3 class="text-xs md:text-sm font-bold text-slate-200">식품구성 자전거 게이지</h3>
+            </div>
+            <span class="text-[10px] text-slate-400">음식을 먹으면 차오릅니다</span>
+          </div>
+
+          <!-- 자전거 SVG 디스플레이 -->
+          <div id="bicycleSvgContainer" class="bg-[#0d0f17] rounded-xl p-2 border border-[#282f45] overflow-hidden flex items-center justify-center min-h-[220px]">
+            <!-- JS 동적 렌더링 -->
+          </div>
+
+          <!-- 6개 식품군 슬롯 상태 리스트 -->
+          <div>
+            <div class="text-[11px] text-slate-400 mb-2">▼ 6대 식품군 수집 슬롯 (각 4개)</div>
+            <div id="foodGroupsStatusList" class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+              <!-- JS 동적 렌더링 -->
+            </div>
+          </div>
+        </section>
+
+        <!-- 우측: CRT 아케이드 캐비닛 캔버스 & 아날로그 조작 패널 (7컬럼) -->
+        <section class="lg:col-span-7 flex flex-col gap-3">
+          
+          <!-- CRT 모니터 베젤 & 캔버스 -->
+          <div class="arcade-bezel p-3 sm:p-4 bg-[#141824] relative flex justify-center items-center">
+            <div class="crt-screen relative w-full flex justify-center items-center bg-[#07090e] rounded-xl overflow-hidden border-2 border-[#2b334a]">
+              
+              <canvas id="gameCanvas" width="640" height="512" class="max-w-full h-auto"></canvas>
+
+              <!-- ★ 시작 대기 화면 (완벽한 레트로 타이틀 락업) -->
+              <div id="startOverlay" class="absolute inset-0 bg-[#090b12]/90 flex flex-col items-center justify-center text-center p-6 text-white z-20">
+                <div class="text-4xl mb-2 animate-bounce">🐍🚴</div>
+                <h2 class="text-2xl sm:text-3xl font-black text-yellow-400 font-pixel tracking-wider mb-2">
+                  식품구성 자전거
+                </h2>
+                <div class="text-xs text-emerald-400 font-pixel mb-5">
+                  ★ RETRO NUTRITION SNAKE ★
+                </div>
+                
+                <p class="text-xs text-slate-300 max-w-sm mb-6 leading-relaxed font-sans">
+                  지정된 식품군의 음식만 쏙쏙 찾아먹어 자전거를 완성하세요!<br>
+                  다른 음식을 먹으면 체력이 줄어들고 지렁이가 길어집니다.
+                </p>
+
+                <!-- 시작 버튼 (큰 아케이드 노란색 버튼) -->
+                <button id="startGameBtn" class="arcade-btn px-8 py-3.5 rounded-xl font-pixel text-base tracking-wider mb-3">
+                  INSERT COIN & START ▶
+                </button>
+
+                <div class="text-[11px] text-slate-400 font-pixel blink">
+                  [ PRESS SPACE OR CLICK BUTTON ]
+                </div>
+              </div>
+
+              <!-- 3, 2, 1 카운트다운 오버레이 -->
+              <div id="countdownOverlay" class="absolute inset-0 bg-[#07090e]/85 flex flex-col items-center justify-center text-center p-6 z-30 hidden">
+                <div id="countdownTitle" class="text-xl sm:text-2xl font-bold mb-1 font-pixel text-yellow-400">
+                  STAGE 01: 곡류 채우기!
+                </div>
+                <div id="countdownDesc" class="text-xs text-slate-300 mb-5 font-sans">
+                  목표 음식만 골라먹으세요!
+                </div>
+                <div id="countdownNumber" class="text-7xl md:text-8xl font-black text-yellow-400 font-pixel countdown-scale">
+                  3
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- 아날로그 조이스틱 & D-Pad 컨트롤러 패널 -->
+          <div class="bg-[#181c2b] rounded-2xl p-3 border border-[#2b334a] flex flex-col sm:flex-row items-center justify-between gap-3 font-pixel">
+            <div class="text-xs text-slate-400 hidden sm:flex items-center gap-2">
+              <span class="px-2 py-1 bg-[#10131d] border border-[#2b334a] rounded text-yellow-400">WASD</span>
+              <span class="px-2 py-1 bg-[#10131d] border border-[#2b334a] rounded text-yellow-400">방향키</span>
+              <span>지렁이 조작</span>
+            </div>
+
+            <!-- 모바일/터치 아날로그 D-Pad -->
+            <div class="flex items-center justify-center w-full sm:w-auto">
+              <div class="grid grid-cols-3 gap-2 w-44">
+                <div></div>
+                <button data-dir="up" class="retro-dpad-btn p-3 font-pixel text-sm">▲</button>
+                <div></div>
+                <button data-dir="left" class="retro-dpad-btn p-3 font-pixel text-sm">◀</button>
+                <button data-dir="down" class="retro-dpad-btn p-3 font-pixel text-sm">▼</button>
+                <button data-dir="right" class="retro-dpad-btn p-3 font-pixel text-sm">▶</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- 플로팅 토스트 피드백 -->
+    <div id="gameToast" class="fixed bottom-6 left-1/2 -translate-x-1/2 px-5 py-2 rounded-lg font-pixel text-xs z-50 opacity-0 pointer-events-none">
+      알림
+    </div>
+
+    <!-- 모달 1: 최종 승리 모달 (VICTORY) -->
+    <div id="victoryModal" class="fixed inset-0 bg-black/80 modal-backdrop flex items-center justify-center p-4 z-50 hidden">
+      <div class="bg-[#181c2b] rounded-2xl max-w-md w-full p-6 text-center border-4 border-yellow-400 font-pixel">
+        <div class="text-4xl mb-2 animate-bounce">🏆</div>
+        <div class="text-xs text-yellow-400 mb-1">ALL CLEAR! CONGRATULATIONS!</div>
+        <h2 class="text-2xl font-bold text-slate-100 mb-3">
+          식품구성 자전거 완성!
+        </h2>
+        <p class="text-xs text-slate-300 font-sans mb-5 leading-relaxed">
+          6가지 식품군을 모두 골고루 먹어 건강하고 완벽한 영양 자전거를 달성했습니다!
+        </p>
+
+        <div class="bg-[#0f121d] rounded-xl p-4 border border-[#2b334a] text-left space-y-2 mb-5 text-xs">
+          <div class="flex justify-between">
+            <span class="text-slate-400">클리어 타임</span>
+            <span id="victoryTime" class="text-yellow-300 font-bold">0분 00초</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">최종 점수</span>
+            <span id="victoryScore" class="text-green-400 font-bold">0 PTS</span>
+          </div>
+          <div class="flex justify-between border-t border-[#2b334a] pt-2">
+            <span class="text-slate-400">명예의 전당</span>
+            <span id="victoryBest" class="text-sky-300 font-bold">최고 기록 갱신!</span>
+          </div>
+        </div>
+
+        <button class="btn-restart arcade-btn-emerald w-full py-3 rounded-xl font-pixel text-sm tracking-wider cursor-pointer">
+          PLAY AGAIN (다시 하기) 🔄
+        </button>
+      </div>
+    </div>
+
+    <!-- 모달 2: 게임 오버 모달 -->
+    <div id="gameOverModal" class="fixed inset-0 bg-black/80 modal-backdrop flex items-center justify-center p-4 z-50 hidden">
+      <div class="bg-[#181c2b] rounded-2xl max-w-sm w-full p-6 text-center border-4 border-rose-600 font-pixel">
+        <div class="text-4xl mb-2">💀</div>
+        <h2 class="text-2xl font-bold text-rose-500 mb-2">GAME OVER</h2>
+        <p id="gameOverReason" class="text-xs text-slate-300 font-sans mb-5 leading-relaxed">
+          체력이 모두 소진되었습니다!
+        </p>
+        <button class="btn-restart arcade-btn w-full py-3 rounded-xl font-pixel text-sm tracking-wider cursor-pointer">
+          CONTINUE? (다시 도전) 🔄
+        </button>
+      </div>
+    </div>
+
+    <!-- 모달 3: 일시정지 모달 -->
+    <div id="pauseModal" class="fixed inset-0 bg-black/70 modal-backdrop flex items-center justify-center p-4 z-50 hidden">
+      <div class="bg-[#181c2b] rounded-2xl max-w-xs w-full p-5 text-center border-2 border-[#3b4463] font-pixel">
+        <h3 class="text-lg font-bold text-yellow-400 mb-2">PAUSE (일시정지)</h3>
+        <p class="text-xs text-slate-400 mb-5 font-sans">준비가 되면 계속하세요.</p>
+        <button id="resumeGameBtn" class="arcade-btn-emerald w-full py-2.5 rounded-xl font-pixel text-xs mb-2 cursor-pointer">
+          RESUME (계속하기) ▶
+        </button>
+        <button class="btn-restart w-full py-2 rounded-xl bg-[#23293d] border border-[#3b4463] text-slate-200 text-xs font-pixel cursor-pointer">
+          RESTART (처음부터) 🔄
+        </button>
+      </div>
+    </div>
+
+    <!-- 모달 4: 게임 방법 안내 모달 -->
+    <div id="guideModal" class="fixed inset-0 bg-black/80 modal-backdrop flex items-center justify-center p-4 z-50 hidden">
+      <div class="bg-[#181c2b] rounded-2xl max-w-lg w-full p-5 sm:p-6 border-2 border-sky-500 font-pixel text-xs max-h-[85vh] overflow-y-auto">
+        <div class="flex items-center justify-between pb-3 border-b border-[#2b334a] mb-3">
+          <h3 class="text-sm font-bold text-sky-400 flex items-center gap-1">
+            <span>📖 게임 방법 및 식품 구성 자전거 규칙</span>
+          </h3>
+          <button id="closeGuideBtn" class="text-slate-400 hover:text-white p-1 cursor-pointer">✕</button>
+        </div>
+        <div class="space-y-3 font-sans text-slate-300 leading-relaxed text-xs">
+          <div class="p-3 bg-[#0f121d] rounded-xl border border-[#2b334a]">
+            🚴 <strong class="text-yellow-300">식품 구성 자전거란?</strong><br>
+            균형 잡힌 식사와 규칙적인 운동, 수분의 적당한 섭취가 건강 유지를 위한 중요한 요소임을 한눈에 보여주는 식사 모형입니다.
+          </div>
+          <div>
+            <h4 class="font-bold text-yellow-400 mb-1">🎮 플레이 규칙:</h4>
+            <ol class="list-decimal pl-4 space-y-1">
+              <li>화면 상단에 제시되는 목표 식품군(예: <strong>곡류 채우기!</strong>)을 확인합니다.</li>
+              <li>지렁이를 조작하여 <strong>해당 식품군에 속하는 정답 음식만</strong> 찾아 먹습니다.</li>
+              <li>음식을 먹을 때마다 지렁이가 1칸 길어지며 자전거 휠에 식품이 채워집니다.</li>
+              <li><strong>다른 식품군(오답)</strong>을 먹으면 체력(♥)이 1개 줄어듭니다!</li>
+              <li>6대 식품군을 모두 완성하여 가장 빠른 기록을 세워보세요!</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 모달 5: 6대 식품군 도감 모달 (2번째 첨부사진 표 기준) -->
+    <div id="encyclopediaModal" class="fixed inset-0 bg-black/80 modal-backdrop flex items-center justify-center p-4 z-50 hidden">
+      <div class="bg-[#181c2b] rounded-2xl max-w-3xl w-full p-5 sm:p-6 border-2 border-yellow-500 font-pixel max-h-[90vh] flex flex-col">
+        <div class="flex items-center justify-between pb-3 border-b border-[#2b334a] mb-3">
+          <div>
+            <h3 class="text-sm font-bold text-yellow-400">
+              📚 6대 식품군 대표 식품 백과사전
+            </h3>
+            <p class="text-[10px] text-slate-400 font-sans">보건복지부·한국영양학회 1인 1회 분량 기준</p>
+          </div>
+          <button id="closeEncyclopediaBtn" class="text-slate-400 hover:text-white p-1 cursor-pointer">✕</button>
+        </div>
+
+        <div class="overflow-x-auto flex-1">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-[#10131d] text-yellow-300 text-[11px] border-b border-[#2b334a]">
+                <th class="p-2.5">식품군</th>
+                <th class="p-2.5">대표 식품 (1회 분량)</th>
+                <th class="p-2.5">열량</th>
+                <th class="p-2.5">주요 기능</th>
+              </tr>
+            </thead>
+            <tbody id="encyclopediaTableBody" class="divide-y divide-[#22283a]">
+              <!-- JS 동적 렌더링 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 하단 푸터 -->
+    <footer class="border-t border-[#23293d] py-2 text-center text-[10px] text-slate-500 bg-[#0d0f17] font-pixel">
+      NUTRITION BICYCLE SNAKE ARCADE &bull; GITHUB PAGES STATIC DEPLOY READY
+    </footer>
+
+  </body>
+</html>

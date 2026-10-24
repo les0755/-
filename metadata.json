@@ -1,0 +1,6 @@
+{
+  "name": "식품 구성 자전거 지렁이 게임",
+  "description": "식품 구성 자전거의 6대 식품군을 배우고 목표 영양 음식을 찾아 먹으며 자전거를 완성하는 재미있는 교육용 지렁이 아케이드 게임",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

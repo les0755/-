@@ -1,0 +1,276 @@
+/* ==========================================================================
+   식품 구성 자전거 지렁이 대모험 - 레트로 아케이드 에디션 (Retro Arcade Edition)
+   ========================================================================== */
+
+@import url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10@1.0/DungGeunMo.woff');
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+KR:wght@700;900&display=swap');
+
+:root {
+  --font-pixel: 'DungGeunMo', 'Press Start 2P', monospace, sans-serif;
+  --font-sans: 'Noto Sans KR', sans-serif;
+  
+  --color-grain: #facc15;
+  --color-vegetable: #4ade80;
+  --color-protein: #c084fc;
+  --color-fruit: #fb7185;
+  --color-dairy: #38bdf8;
+  --color-oil: #94a3b8;
+}
+
+* {
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+body {
+  font-family: var(--font-pixel);
+  background-color: #12131c;
+  background-image: 
+    radial-gradient(#1e2130 15%, transparent 16%),
+    radial-gradient(#1a1c29 15%, transparent 16%);
+  background-size: 40px 40px;
+  background-position: 0 0, 20px 20px;
+  color: #f8fafc;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+.font-pixel {
+  font-family: var(--font-pixel);
+  letter-spacing: -0.5px;
+}
+
+/* 레트로 아케이드 캐비닛 프레임 */
+.arcade-bezel {
+  background: #1e2230;
+  border: 4px solid #33394f;
+  border-radius: 20px;
+  box-shadow: 
+    inset 0 0 20px rgba(0, 0, 0, 0.8),
+    0 15px 35px rgba(0, 0, 0, 0.6),
+    0 0 0 2px #0f111a;
+  position: relative;
+}
+
+/* CRT 스캔라인 효과 */
+.crt-screen {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.crt-screen::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+  background-size: 100% 4px;
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0.65;
+}
+
+.crt-screen::after {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: radial-gradient(circle at center, transparent 65%, rgba(0, 0, 0, 0.45) 100%);
+  z-index: 11;
+  pointer-events: none;
+}
+
+/* 캔버스 화면 */
+#gameCanvas {
+  background-color: #0b0d14;
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  transition: transform 0.1s ease-out;
+}
+
+#gameCanvas.shake {
+  animation: screenShake 0.35s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes screenShake {
+  10%, 90% { transform: translate3d(-4px, 0, 0); }
+  20%, 80% { transform: translate3d(5px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+  40%, 60% { transform: translate3d(6px, 0, 0); }
+}
+
+/* 레트로 아케이드 깜빡임 (PRESS START) */
+.blink {
+  animation: arcadeBlink 1s infinite steps(2, start);
+}
+
+@keyframes arcadeBlink {
+  to { visibility: hidden; }
+}
+
+/* 카운트다운 팝 애니메이션 */
+.countdown-scale {
+  animation: countdownPop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes countdownPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.4) rotate(-5deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15) rotate(2deg);
+  }
+  80% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.3) translateY(-15px);
+  }
+}
+
+/* 레트로 오락실 아날로그 버튼 */
+.arcade-btn {
+  background: linear-gradient(to bottom, #f59e0b, #d97706);
+  border: 3px solid #78350f;
+  box-shadow: 0 6px 0 #78350f, 0 10px 15px rgba(0, 0, 0, 0.4);
+  color: #fff;
+  text-shadow: 1px 1px 0 #78350f;
+  transition: all 0.08s ease;
+  cursor: pointer;
+}
+.arcade-btn:hover {
+  filter: brightness(1.1);
+}
+.arcade-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #78350f, 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.arcade-btn-emerald {
+  background: linear-gradient(to bottom, #10b981, #059669);
+  border: 3px solid #064e3b;
+  box-shadow: 0 6px 0 #064e3b, 0 10px 15px rgba(0, 0, 0, 0.4);
+  text-shadow: 1px 1px 0 #064e3b;
+}
+.arcade-btn-emerald:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #064e3b;
+}
+
+.arcade-btn-dark {
+  background: linear-gradient(to bottom, #334155, #1e293b);
+  border: 2px solid #0f172a;
+  box-shadow: 0 4px 0 #0f172a;
+}
+.arcade-btn-dark:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #0f172a;
+}
+
+/* 모바일 D-Pad */
+.retro-dpad-btn {
+  background: linear-gradient(to bottom, #2d3345, #1e2230);
+  border: 2px solid #4a5268;
+  box-shadow: 0 4px 0 #0f111a;
+  color: #f8fafc;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: all 0.08s ease;
+}
+.retro-dpad-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #0f111a;
+  background: #3e465e;
+}
+
+/* 보글보글(Bubble Bobble) 스타일 스테이지 낙하 애니메이션 */
+@keyframes bubbleBobbleDrop {
+  0% { transform: translateY(0); opacity: 1; }
+  40% { transform: translateY(-10px); }
+  100% { transform: translateY(500px); opacity: 0; }
+}
+
+@keyframes bubbleBobbleEnter {
+  0% { transform: translateY(-400px); opacity: 0; }
+  70% { transform: translateY(15px); opacity: 1; }
+  85% { transform: translateY(-8px); }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.stage-fall-down {
+  animation: bubbleBobbleDrop 0.65s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards;
+}
+
+.stage-drop-enter {
+  animation: bubbleBobbleEnter 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* HURRY UP! 긴급 패닉 모드 */
+.hurry-up-pulse {
+  animation: hurryPulse 0.4s infinite alternate;
+}
+
+@keyframes hurryPulse {
+  from {
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.6), inset 0 0 10px rgba(239, 68, 68, 0.4);
+    border-color: #ef4444;
+  }
+  to {
+    box-shadow: 0 0 25px rgba(239, 68, 68, 0.9), inset 0 0 20px rgba(239, 68, 68, 0.7);
+    border-color: #f87171;
+  }
+}
+
+.hurry-banner-blink {
+  animation: hurryBlink 0.3s infinite alternate steps(2, start);
+}
+
+@keyframes hurryBlink {
+  from { color: #facc15; }
+  to { color: #ef4444; }
+}
+
+/* 슬롯 카드 */
+.slot-badge {
+  background: #181b26;
+  border: 2px solid #282d3f;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+.slot-badge.active {
+  border-color: #facc15;
+  box-shadow: 0 0 12px rgba(250, 204, 21, 0.4);
+}
+.slot-badge.completed {
+  border-color: #22c55e;
+  background: #0f2317;
+}
+
+/* 자전거 회전 애니메이션 */
+.pedal-rotate {
+  transform-origin: 225px 250px;
+  animation: pedalSpin 0.9s linear infinite;
+}
+@keyframes pedalSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.modal-backdrop {
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
